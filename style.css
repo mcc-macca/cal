@@ -29,3 +29,7 @@ body {
 .bordered {
     border: 1px solid #fff;
 }
+
+.content table {
+    width: 100%;
+}
