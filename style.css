@@ -30,6 +30,19 @@ body {
     border: 1px solid #fff;
 }
 
-.content table {
+.default {
     width: 100%;
+}
+
+td.bordered {
+    vertical-align: top;
+    width: 50%;
+}
+
+.bordered {
+    margin: 30px;
+}
+
+.modaltable {
+    margin-left: 30px;
 }
