@@ -27,6 +27,24 @@ if (isset($_POST['submit_giorno_top'])) {
     $link = "index.php?view=k";
 }
 
+if (isset($_POST['addeventsubmit'])) {
+
+    $titoloevento = html_string($_POST['titoloevento']);
+    $luogoevento = html_string($_POST['luogoevento']);
+    $datainizio = html_string($_POST['datainizio']);
+    $orainizio = isset($_POST['orainizio']) ? html_string($_POST['orainizio']) : '';
+    $datafine = isset($_POST['datafine']) ? html_string($_POST['datafine']) : '';
+    $orafine = isset($_POST['orafine']) ? html_string($_POST['orafine']) : '';
+    $descrizioneEvento = html_string($_POST['descrizioneEvento']);
+    $caricatoda = $_SESSION['uid'];
+
+    $tuttoilgiorno = isset($_POST["tuttoilgiorno"]) && $_POST["tuttoilgiorno"] === "1" ? 1 : 0;
+
+
+    $addeventquery = $conn->query("INSERT INTO `kal_eventi`(`datainizio`, `datafine`, `titolo`, `descrizione`, `caricatoda`, `orainizio`, `orafine`, `tuttoilgiorno`, `luogo`) VALUES 
+    ('$datainizio','$datafine','$titoloevento','$descrizioneEvento','$caricatoda','$orainizio','$orafine','$tuttoilgiorno','$luogoevento')");
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -34,7 +52,6 @@ if (isset($_POST['submit_giorno_top'])) {
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MCkalnedar</title>
     <link rel="stylesheet" href="style.css">
     <script src="jquery.js"></script>
@@ -98,64 +115,96 @@ if (isset($_POST['submit_giorno_top'])) {
         } elseif (isset($_GET['action'])) {
             $getaction = $_GET['action'];
             if ($getaction == 'addevent') {
-                ?>
+        ?>
                 <h1>AGGIUNGI EVENTO AL DATABASE</h1>
-                <table class="modaltable">
-                    <tr>
-                        <td>Titolo:</td>
-                        <td colspan="2"><input type="text" name="titoloevento" placeholder="Nuovo Evento"></td>
-                    </tr>
-                    <tr>
-                        <td>Luogo:</td>
-                        <td colspan="2"><input type="text" name="luogoevento"></td>
-                    </tr>
-                    <tr>
-                        <td colspan="3"><hr></td>
-                    </tr>
-                    <tr>
-                        <td>&nbsp;</td>
-                        <td colspan="2"><input type="checkbox" name="alldayevento" id="alldayevento"> Evento di tutto il giorno</td>
-                    </tr>
-                    <tr>
-                        <td>Inizio:</td>
-                        <td><input type="date" name="datainizio" id="datainizio"></td>
-                        <td><input type="time" name="orainizio" id="orainizio"></td>
-                    </tr>
-                    <tr>
-                        <td>Fine:</td>
-                        <td><input type="date" name="datafine" id="datafine"></td>
-                        <td><input type="time" name="orafine" id="orafine"></td>
-                    </tr>
-                    <tr>
-                        <td colspan="3"><hr></td>
-                    </tr>
-                    <tr>
-                        <td colspan="3">Descrizione:</td>
-                    </tr>
-                    <tr>
-                        <td colspan="3">
-                            <textarea name="descrizioneEvento" id="descrizioneEvento" cols="30" rows="5"></textarea>
-                        </td>
-                    </tr>
-                </table>
-                <?php
+                <form action="index.php" method="post">
+                    <table class="modaltable">
+                        <tr>
+                            <td>Titolo:</td>
+                            <td colspan="2"><input type="text" name="titoloevento" placeholder="Nuovo Evento"></td>
+                        </tr>
+                        <tr>
+                            <td>Luogo:</td>
+                            <td colspan="2"><input type="text" name="luogoevento"></td>
+                        </tr>
+                        <tr>
+                            <td colspan="3">
+                                <hr>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>&nbsp;</td>
+                            <td colspan="2"><input type="checkbox" name="alldayevento" id="alldayevento" value="1"> Evento di tutto il giorno</td>
+                        </tr>
+                        <tr>
+                            <td>Inizio:</td>
+                            <td><input type="date" name="datainizio" id="datainizio"></td>
+                            <td><input type="time" name="orainizio" id="orainizio"></td>
+                        </tr>
+                        <tr>
+                            <td>Fine:</td>
+                            <td><input type="date" name="datafine" id="datafine"></td>
+                            <td><input type="time" name="orafine" id="orafine"></td>
+                        </tr>
+                        <tr>
+                            <td colspan="3">
+                                <hr>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="3">Descrizione:</td>
+                        </tr>
+                        <tr>
+                            <td colspan="3">
+                                <textarea name="descrizioneEvento" id="descrizioneEvento" cols="30" rows="5"></textarea>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="3">
+                                <center>
+                                    <a href="index.php"><button>&times; CANCELLA</button></a>
+                                    <input type="submit" value="&plus; AGGIUNGI" name="addeventsubmit">
+                                </center>
+                            </td>
+                        </tr>
+                    </table>
+                </form>
+            <?php
             }
         } else {
-        ?>
+            ?>
             <table class="default">
                 <tr>
                     <td rowspan="2" class="bordered">
                         <h1>Prossimi eventi in calendario <a href="index.php?action=addevent"><button>+ AGGIUNGI EVENTO</button></a></h1>
                         <?php
-                        $prossimieventiq = $conn->query("SELECT * FROM kal_eventi WHERE datainizio <= '" . date("d/m/Y") . "' AND caricatoda='" . $_SESSION['uid'] . "';");
+                        $dataOggi = date("Y-m-d");
+                        $utenteAttuale = $_SESSION['uid'];
+                        $prossimieventiq = $conn->query("SELECT * FROM kal_eventi WHERE caricatoda = '$utenteAttuale';");
+
                         if ($prossimieventiq->num_rows > 0) {
+                            print "<table class='bordered inbordered'>
+                            <tr>
+                                <th>DATA</th>
+                                <th>TITOLO</th>
+                                <th>LUOGO</th>
+                                <th></th>
+                            </tr>";
                             while ($pedt = $prossimieventiq->fetch_assoc()) {
-                                $x = $x + 1;
+                                print "<tr>
+                    <td>" . $pedt['datainizio'] . "</td>
+                    <td>" . $pedt['titolo'] . "</td>
+                    <td>" . $pedt['luogo'] . "</td>
+                    <td><a href='index.php?visualizza=dettagli&id=" . $pedt['id'] . "'><button>DETTAGLI</button></a></td>
+               </tr>
+        ";
                             }
+                            print "</table>";
                         } else {
-                            print "<h2 style='color: #ff0000'>NO EVENTS PRESENT IN THE DATABASE</h2>";
+                            print "<h2 style='color: #ff0000'>NO EVENTS PRESENT IN THE DATABASE!!</h2>";
                         }
                         ?>
+
                     </td>
                     <td class="bordered">
                         <h1>Questa settimana</h1>
@@ -163,8 +212,10 @@ if (isset($_POST['submit_giorno_top'])) {
                         // Ottenere la data corrente
                         $oggi = time();
 
+                        $monndayy = date("D") === "Mon" ? "monday" : "last monday";
+
                         // Calcolare la data del lunedì della settimana corrente
-                        $lunedi_settimana_corrente = strtotime("monday", $oggi);
+                        $lunedi_settimana_corrente = strtotime($monndayy, $oggi);
 
                         // Generare la tabella
                         echo '<table border="1">
@@ -214,10 +265,12 @@ if (isset($_POST['submit_giorno_top'])) {
                     // Se è selezionato, disabilita gli input di ora
                     $("#orainizio").prop("disabled", true);
                     $("#orafine").prop("disabled", true);
+                    $("#datafine").prop("disabled", true)
                 } else {
                     // Se è deselezionato, abilita gli input di ora
                     $("#orainizio").prop("disabled", false);
                     $("#orafine").prop("disabled", false);
+                    $("#datafine").prop("disabled", false)
                 }
             });
         });

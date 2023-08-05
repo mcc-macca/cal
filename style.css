@@ -43,6 +43,11 @@ td.bordered {
     margin: 30px;
 }
 
+.inbordered td {
+    border-collapse: collapse;
+    border: 1px solid #fff;
+}
+
 .modaltable {
     margin-left: 30px;
 }
